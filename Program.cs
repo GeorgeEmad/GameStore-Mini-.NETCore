@@ -21,20 +21,13 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapGet("/games", () => games);
 
-app.MapGet("/games/{id}", (int id) => {
-    Game? game = games.Find((x) => x.Id == id);
+var gameGroup = app.MapGroup("/games")
+                    .WithParameterValidation();
 
-    if(game is null)
-    {
-        return Results.NotFound();
-    }
+gameGroup.MapGet("/", () => games);
 
-    return Results.Ok(game);
-}).WithName(GetGameEndPointName);
-
-app.MapPost("/games", (Game game) => {
+gameGroup.MapPost("/", (Game game) => {
     if(game is null)
     {
         return Results.BadRequest();
@@ -46,7 +39,19 @@ app.MapPost("/games", (Game game) => {
     return Results.CreatedAtRoute(GetGameEndPointName, new {id = game.Id}, game);
 });
 
+gameGroup.MapGet("/{id}", (int id) => {
+    Game? game = games.Find((x) => x.Id == id);
+
+    if(game is null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(game);
+}).WithName(GetGameEndPointName);
+
+
+
 
 
 app.Run();
- 
