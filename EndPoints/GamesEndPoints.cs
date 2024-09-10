@@ -10,13 +10,12 @@ public static class GameEndPoints
 
     public static RouteGroupBuilder MapGameEndPoints(this IEndpointRouteBuilder route)
     {
-        IGamesRepository repo = new InMemGamesRepository();
         var gameGroup = route.MapGroup("/games")
                     .WithParameterValidation();
 
-        gameGroup.MapGet("/", async () => await repo.GetAllAsync());
+        gameGroup.MapGet("/", async (IGamesRepository repo ) => await repo.GetAllAsync());
 
-        gameGroup.MapPost("/", async (Game game) =>
+        gameGroup.MapPost("/", async (IGamesRepository repo, Game game) =>
         {
             if (game is null)
             {
@@ -28,7 +27,7 @@ public static class GameEndPoints
             return Results.CreatedAtRoute(GetGameEndPointName, new { id = game.Id }, game);
         });
 
-        gameGroup.MapGet("/{id}", async (int id) =>
+        gameGroup.MapGet("/{id}", async (IGamesRepository repo, int id) =>
         {
             Game? game = await repo.GetAsync(id);
 
